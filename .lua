@@ -9,7 +9,7 @@ mt.__namecall = newcclosure(function(self, ...)
 	local Method = getnamecallmethod()
 	local Args = {...}
 
-	if Method == 'InvokeServer' and self.Name == 'DataPullFunc' then
+	if Method == 'InvokeServer' and self.Name == 'DataPullFunc' and Args[2] == workspace.Mine.Blocks then
                 ReturningBlocksName = Args[2]
 	--elseif Method == 'InvokeServer' and self.Name == 'DataPullFunc' and Args[2] == workspace.Mine.Blocks:find("1_") then
 		--NominalBlocks = workspace.Mine.Blocks["1_10"]
