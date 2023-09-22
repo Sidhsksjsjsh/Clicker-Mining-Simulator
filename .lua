@@ -1,48 +1,24 @@
-local ReturningBlocksName = nil
-local NominalBlocks = nil
-local mt = getrawmetatable(game);
-setreadonly(mt,false)
-local namecall = mt.__namecall
+local pemain = game.Players.LocalPlayer
+local sensorJarak = 50
 local workspace = game:GetService("Workspace")
 
-mt.__namecall = newcclosure(function(self, ...)
-	local Method = getnamecallmethod()
-	local Args = {...}
-
-	if Method == 'InvokeServer' and self.Name == 'DataPullFunc' and Args[2] then
-                ReturningBlocksName = Args[2]
-end
-	return namecall(self, ...) 
-end)
-
-local player = game.Players.LocalPlayer
-local character = player.Character
-local workspace = game:GetService("Workspace")
-
-local function findNearestPart()
-    local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-    local nearestDistance = math.huge
-    local nearestPart = nil
-
-    for _, part in pairs(workspace:FindPartsInRegion3(workspace.CurrentCamera:WorldToViewportPoint(humanoidRootPart.Position), nil, 50)) do
-        if part.Parent and part.Parent ~= character then
-            local distance = (humanoidRootPart.Position - part.Position).Magnitude
-            if distance < nearestDistance then
-                nearestDistance = distance
-                nearestPart = part
+function GetNearestBlockWithChild()
+    local posisiPemain = pemain.Character.HumanoidRootPart.Position
+    local jarakTerdekat = sensorJarak
+    local blokTerdekat = nil
+    local childDariBlokTerdekat = nil
+    
+    for _, block in pairs(workspace.Mine.Blocks:GetChildren()) do
+        local jarak = (posisiPemain - block.Position).magnitude
+        if jarak < jarakTerdekat then
+            for _, selfreturn in pairs(block:GetChildren()) do
+                jarakTerdekat = jarak
+                blokTerdekat = block
+                childDariBlokTerdekat = selfreturn
             end
         end
     end
-
-    return nearestPart and nearestPart.Name or nil
-end
-
-local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-
-local function findPartBelowFeet()
-    local ray = Ray.new(humanoidRootPart.Position, Vector3.new(0, -1, 0))
-    local hitPart, hitPosition = workspace:FindPartOnRay(ray, character)
-    return hitPart and hitPart.Name or nil
+    return blokTerdekat, childDariBlokTerdekat
 end
 
 local Library = 
@@ -50,28 +26,19 @@ loadstring(Game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-f
 local Window_1 = Library:NewWindow("Clicker Mining Simulator")
 
 local Tab1 = Window_1:NewSection("Main")
+local hint = Instance.new("Hint", workspace)
 
-
-Tab1:CreateToggle("Auto Click Block V1", function(value)
+Tab1:CreateToggle("Auto Click Nearest Block", function(value)
 _G.ClickDick = value
 	while wait() do
 	     if _G.ClickDick == false then break end
-		game:GetService("ReplicatedStorage").CommonLibrary.Tool.RemoteManager.Funcs.DataPullFunc:InvokeServer("CalculatePlayerDamageChannel",ReturningBlocksName)
+		local block, selfreturn = GetNearestBlockWithChild()
+
+    if block and selfreturn then
+        hint.Text = "Nearest block: " .. tostring(block.Name) .. " | Objects in blocks: " .. tostring(selfreturn.Name)
+        game:GetService("ReplicatedStorage").CommonLibrary.Tool.RemoteManager.Funcs.DataPullFunc:InvokeServer("CalculatePlayerDamageChannel",workspace.Mine.Blocks[block.Name][selfreturn.Name])
+    else
+        hint.Text = "The block or object within the block was not found"
+    end
 	end
 end)
-
-Tab1:CreateToggle("Auto Click Block V2", function(value)
-_G.V2 = value
-	while wait() do
-		if _G.V2 == false then break end
-			game:GetService("ReplicatedStorage").CommonLibrary.Tool.RemoteManager.Funcs.DataPullFunc:InvokeServer("CalculatePlayerDamageChannel",workspace.Mine.Blocks["1_10"][findNearestPart()])
-		end
-	end)
-
-Tab1:CreateToggle("Auto Click Block V3", function(value)
-_G.V3 = value
-	while wait() do
-		if _G.V3 == false then break end
-			game:GetService("ReplicatedStorage").CommonLibrary.Tool.RemoteManager.Funcs.DataPullFunc:InvokeServer("CalculatePlayerDamageChannel",workspace.Mine.Blocks["1_10"][findPartBelowFeet()])
-		end
-	end)
