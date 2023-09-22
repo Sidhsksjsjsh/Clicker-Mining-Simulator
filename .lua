@@ -9,9 +9,9 @@ function GetNearestBlockWithChild()
     local childDariBlokTerdekat = nil
     
     for _, block in pairs(workspace.Mine.Blocks:GetChildren()) do
-        local jarak = (posisiPemain - block.Position).magnitude
-        if jarak < jarakTerdekat then
-            for _, selfreturn in pairs(block:GetChildren()) do
+        for _, selfreturn in pairs(block:GetChildren()) do
+                local jarak = (posisiPemain - selfreturn.Position).magnitude
+                if jarak < jarakTerdekat then
                 jarakTerdekat = jarak
                 blokTerdekat = block
                 childDariBlokTerdekat = selfreturn
