@@ -1,5 +1,5 @@
 local pemain = game.Players.LocalPlayer
-local sensorJarak = 50
+local sensorJarak = 5
 local workspace = game:GetService("Workspace")
 
 function GetNearestBlockWithChild()
